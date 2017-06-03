@@ -11,11 +11,11 @@ before_deploy:
 deploy:
 - provider: gae
   project: "web-services-staging"
-  keyfile: "./src/config/client-secret.json"
+  keyfile: "./src/config/client-secret.json.enc"
   on:
     branch: staging
 - provider: gae
   project: "web-services-production"
-  keyfile: "./src/config/client-secret.json"
+  keyfile: "./src/config/client-secret.json.enc"
   on:
     branch: master
