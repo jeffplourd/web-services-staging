@@ -8,13 +8,13 @@ before_deploy:
 deploy:
 - provider: gae
   project: web-services-staging
-  keyfile: client-secret.json.enc
+  keyfile: client-secret.json
   skip_cleanup: true
   on:
     branch: staging
 - provider: gae
   project: web-services-production
-  keyfile: client-secret.json.enc
+  keyfile: client-secret.json
   skip_cleanup: true
   on:
     branch: master
