@@ -4,6 +4,7 @@
     "host": "",
     "port": "",
     "user": "",
-    "database": "postgres"
+    "database": "postgres",
+    "password": "postgres"
   }
 }

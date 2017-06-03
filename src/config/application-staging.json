@@ -1,9 +1,10 @@
 {
   "env": "staging",
   "postgres": {
-    "host": "",
-    "port": "",
-    "user": "",
-    "database": "postgres"
+    "host": "35.184.156.87",
+    "port": "5432",
+    "user": "postgres",
+    "database": "postgres",
+    "password": "postgres"
   }
 }

@@ -183,7 +183,7 @@ gulp.task('dbLocalClean', [ 'dbLocalStop' ], (cb) => {
 
 gulp.task('dbLocalCreateContainer', (cb) => {
   $exec('docker pull postgres')
-    .then(() => $exec('docker create --name postgres -p 5432:5432 postgres'))
+    .then(() => $exec('docker create --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres'))
     .then(() => cb());
 });
 
@@ -219,7 +219,8 @@ environments.forEach((config) => {
         "postgres_user": config.postgres.user,
         "postgres_host": config.postgres.host,
         "postgres_port": config.postgres.port,
-        "postgres_database": config.postgres.database
+        "postgres_database": config.postgres.database,
+        "postgres_password": config.postgres.password
       }
     };
 
@@ -229,6 +230,6 @@ environments.forEach((config) => {
   });
 });
 
-
-
-
+gulp.task('serve', [ BUILD ], (cb) => {
+  $exec('node build/server.js').then(() => cb());
+});
