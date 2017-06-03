@@ -1,0 +1,21 @@
+
+before_deploy:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+      gulp makeAppYaml-production;
+    fi
+  - if [ "$TRAVIS_BRANCH" == "staging" ]; then
+      gulp makeAppYaml-production;
+    fi
+  - gulp build;
+
+deploy:
+- provider: gae
+  project: "web-services-staging"
+  keyfile: "./src/config/client-secret.json"
+  on:
+    branch: staging
+- provider: gae
+  project: "web-services-production"
+  keyfile: "./src/config/client-secret.json"
+  on:
+    branch: master

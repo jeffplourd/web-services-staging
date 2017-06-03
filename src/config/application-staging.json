@@ -1,0 +1,9 @@
+{
+  "env": "staging",
+  "postgres": {
+    "host": "",
+    "port": "",
+    "user": "",
+    "database": "postgres"
+  }
+}
