@@ -1,7 +1,7 @@
 {
   "env": "staging",
   "postgres": {
-    "host": "35.184.156.87",
+    "host": "web-services-staging:us-central1:postgres-staging",
     "port": "5432",
     "user": "postgres",
     "database": "postgres",
