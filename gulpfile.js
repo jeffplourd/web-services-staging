@@ -204,8 +204,6 @@ gulp.task('dbUpdate', (cb) => {
 });
 
 environments.forEach((config) => {
-  console.log('config', config.env);
-
   if (!config.env) {
     return;
   }
