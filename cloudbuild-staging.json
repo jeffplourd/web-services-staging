@@ -4,13 +4,13 @@
       "name": "gcr.io/cloud-builders/docker",
       "args": [
         "build",
-        "-t", "gcr.io/my-project/first-image",
+        "-t", "gcr.io/web-services-staging/first-image",
         "-f", "dockerfiles/Dockerfile.staging",
         "."
       ]
     }
   ],
   "images": [
-    "gcr.io/my-project/first-image"
+    "gcr.io/web-services-staging/first-image"
   ]
 }
