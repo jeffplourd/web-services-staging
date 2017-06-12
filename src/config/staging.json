@@ -1,0 +1,16 @@
+{
+  "env": "staging",
+  "postgres": {
+    "host": "104.154.139.93",
+    "port": "5432",
+    "user": "postgres",
+    "database": "postgres",
+    "password": "postgres",
+    "ssl": {
+      "rejectUnauthorized": false,
+      "ca": "certs/server-ca.pem",
+      "key": "certs/client-key.pem",
+      "cert": "certs/client-cert.pem"
+    }
+  }
+}

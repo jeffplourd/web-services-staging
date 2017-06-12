@@ -4,8 +4,9 @@ import * as userDao from '../dao/UserDao'
 const router = Router()
 
 router.get('/', (req: Request, res: Response) => {
-  res.status(200).send({
-    message: 'user controller is running!'
+  userDao.getAll().then((users) => {
+    console.log('all users: ', users);
+    res.status(200).send({ users });
   })
 })
 
@@ -19,6 +20,8 @@ router.post('/', (req: Request, res: Response) => {
       userDao.create(req.body).then((user) => {
         console.log('user', user)
         res.status(200).send({token: 'this is a token'})
+      }).catch((err) => {
+        console.log("err", err);
       })
     }
     else {

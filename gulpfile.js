@@ -17,7 +17,6 @@ let exec = require('child_process').exec;
 let argv = require('yargs').argv;
 let YAML = require('yamljs');
 
-
 const CLEAN_BUILD = 'clean:build';
 const CLEAN_COVERAGE = 'clean:coverage';
 const CLEAN_DOC = 'clean:doc';
@@ -40,15 +39,50 @@ const STATIC_FILES = ['./src/**/*.json'];
 
 const tsProject = typescript.createProject('tsconfig.json');
 
-let defaultInfo = require('./src/config/application.json');
-let stagingInfo = require('./src/config/application-staging.json');
-let productionInfo = require('./src/config/application-production.json');
+const PORT = 3000;
+const VERSION = require('./package.json').version;
 
-let environments = [
-  defaultInfo,
-  stagingInfo,
-  productionInfo
-];
+const gcloud = {
+  dbBucket: 'database-scripts-jeff',
+  dbAppBucket: 'web-services',
+  domain: 'us.gcr.io',
+  projectId: 'classkick-907',
+  clusterId: 'web-services',
+  zoneId: 'us-central1-f'
+};
+
+gcloud.uri = `${gcloud.domain}/${gcloud.projectId}/`;
+gcloud.dbScripts = `gs://${gcloud.dbBucket}/${gcloud.dbAppBucket}/${VERSION}`
+
+const env = {
+  NODE_ENV: argv.env || 'default',
+  NODE_CONFIG_DIR: './src/config'
+};
+
+class DockerUtils {
+  static image(docker) {
+    return `${gcloud.uri()}${docker.imageName}:${VERSION}`
+  }
+  static container(docker) {
+    return `${docker.imageName}.container`
+  }
+  static writeDockerfile(text) {
+    fs.writeFileSync('./build/Dockerfile', text);
+  }
+}
+
+function $exec(cmd, options = {}) {
+  return new Promise((resolve, reject) => {
+    let child = exec(cmd, options, (err, stdout, stderr) => {
+      if (err) {
+        reject(stderr);
+      }
+      resolve(stdout);
+    });
+    child.stdout.pipe(process.stdout);
+    child.stderr.pipe(process.stderr);
+  });
+}
 
 // Removes the ./build directory with all its content.
 gulp.task(CLEAN_BUILD, function(callback) {
@@ -160,20 +194,24 @@ gulp.task('watch', [BUILD], function() {
     ext: 'ts js json',
     script: 'build/server.js',
     watch: ['src/*', 'test/*'],
-    tasks: [BUILD]
+    tasks: [BUILD],
+    env
   });
 });
 
-function $exec(cmd) {
-  return new Promise((resolve) => {
-    exec(cmd, (err, stdout, stderr) => {
-      if (err) {
-        console.log(stderr);
-      }
-      resolve(stdout);
-    });
-  });
-}
+gulp.task('serve', [ BUILD ], (cb) => {
+
+  function serve(cb) {
+    $exec('node build/server.js', { env }).then(() => cb());
+  }
+
+  if (env.NODE_ENV === 'default') {
+    runSequence('dbUpdate', () => serve(cb));
+  }
+  else {
+    serve(cb);
+  }
+});
 
 gulp.task('dbLocalClean', [ 'dbLocalStop' ], (cb) => {
   $exec('docker rm postgres')
@@ -184,7 +222,8 @@ gulp.task('dbLocalClean', [ 'dbLocalStop' ], (cb) => {
 gulp.task('dbLocalCreateContainer', (cb) => {
   $exec('docker pull postgres')
     .then(() => $exec('docker create --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres'))
-    .then(() => cb());
+    .then(() => cb())
+    .catch(() => cb());
 });
 
 gulp.task('dbLocalStart', ['dbLocalCreateContainer'], (cb) => {
@@ -199,35 +238,58 @@ gulp.task('dbCreateFile', (cb) => {
   $exec(`node ./src/db/migrate.js create ${argv.filename}`).then(() => cb());
 });
 
+function dbMigrate(success, fails = 0) {
+  $exec('node ./build/db/migrate.js', { env })
+    .then((stdout) => {
+      success(stdout);
+    })
+    .catch((stderr) => {
+      fails++;
+      if (fails < 5) {
+        setTimeout(() => dbMigrate(success, fails), 2500);
+      }
+      else {
+        throw Error(stderr);
+      }
+    });
+}
+
 gulp.task('dbUpdate', (cb) => {
-  $exec('node ./src/db/migrate.js migrate').then(() => cb())
+  if (env.NODE_ENV === 'default') {
+    runSequence(BUILD, 'dbLocalStart', () => dbMigrate(() => cb()));
+  }
+  else {
+    runSequence(BUILD, () => dbMigrate(() => cb()));
+  }
 });
 
-environments.forEach((config) => {
-  if (!config.env) {
+gulp.task('dbPublish', (cb) => {
+  $exec(`gsutil rsync -r -d -c src/db ${gcloud.dbScripts}`).then(() => cb())
+});
+
+gulp.task('dockerBuild', (cb) => {
+  if (env.NODE_ENV === 'default') {
     return;
   }
 
-  gulp.task(`makeAppYaml-${config.env}`, (cb) => {
-
-    let json = {
-      "runtime": "nodejs",
-      "env": "flex",
-      "env_variables": {
-        "postgres_user": config.postgres.user,
-        "postgres_host": config.postgres.host,
-        "postgres_port": config.postgres.port,
-        "postgres_database": config.postgres.database,
-        "postgres_password": config.postgres.password
-      }
-    };
-
-    fs.writeFile('./app.yml', YAML.stringify(json), () => {
-      cb();
-    })
-  });
+  $exec(`docker build -f dockerfiles/Dockerfile.${env.NODE_ENV} -t web-services-${env.NODE_ENV} .`)
+    .then(() => cb());
 });
 
-gulp.task('serve', [ BUILD ], (cb) => {
-  $exec('node build/server.js').then(() => cb());
+gulp.task('dockerRun', (cb) => {
+  if (env.NODE_ENV === 'default') {
+    return;
+  }
+
+  $exec(`docker create --name=web-services-${env.NODE_ENV} -p 3000:3000 web-services-${env.NODE_ENV}`)
+    .then(() => $exec(`docker start web-services-${env.NODE_ENV}`))
+    .then(() => cb());
 });
+
+//
+// psql "sslmode=verify-full sslrootcert=server-ca.pem \
+//       sslcert=client-cert.pem sslkey=client-key.pem \
+//       hostaddr=104.154.139.93 \
+//       host=web-services-staging:web-services-staging-db \
+//       port=5432 \
+//       user=postgres dbname=postgres"

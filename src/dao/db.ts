@@ -1,14 +1,28 @@
 import * as knex from 'knex';
+import { postgres } from 'config';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const connection = {
+  host : postgres.host,
+  port: postgres.port,
+  user : postgres.user,
+  database : postgres.database,
+  password: postgres.password
+};
+
+if (postgres.ssl) {
+  console.log('ssl certs');
+  connection['ssl'] = {
+    ca: fs.readFileSync(path.resolve(postgres.ssl.ca)).toString(),
+    key: fs.readFileSync(path.resolve(postgres.ssl.key)).toString(),
+    cert: fs.readFileSync(path.resolve(postgres.ssl.cert)).toString()
+  }
+}
 
 let db = knex({
   client: 'postgres',
-  connection: {
-    host : process.env.postgres_host || '192.168.99.100',
-    port: process.env.postgres_port || '5432',
-    user : process.env.postgres_user || 'postgres',
-    database : process.env.postgres_database || 'postgres',
-    password: process.env.postgres_password || 'postgres'
-  }
+  connection
 });
 
 export default db;
