@@ -3,8 +3,6 @@ machine:
     PROJECT_NAME: web-services-staging
     CLUSTER_NAME: web-services-staging-cluster
     CLOUDSDK_COMPUTE_ZONE: us-central1-b
-  node:
-    version: 8.0
 
 dependencies:
   pre:
