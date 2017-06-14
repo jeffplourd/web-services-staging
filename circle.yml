@@ -25,8 +25,8 @@ deployment:
   production:
     branch: production
     commands:
-      - ./deploy.sh
+      - bash deploy.sh
   staging:
     branch: staging
     commands:
-      - ./deploy.sh
+      - bash deploy.sh
