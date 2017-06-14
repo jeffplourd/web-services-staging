@@ -7,8 +7,7 @@ WORKDIR /usr/src/app
 # Install app dependencies
 COPY . /usr/src/app/
 RUN npm install
-RUN npm install -g gulp
 
 EXPOSE 3000
 
-CMD ["gulp", "serve", "--env=production"]
+CMD ["./node_modules/.bin/gulp", "serve", "--env=staging"]
