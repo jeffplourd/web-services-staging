@@ -1,7 +1,7 @@
-import * as knex from 'knex';
-import { postgres } from 'config';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as knex from 'knex'
+import { postgres } from 'config'
+import * as fs from 'fs'
+import * as path from 'path'
 
 const connection = {
   host : postgres.host,
@@ -9,10 +9,10 @@ const connection = {
   user : postgres.user,
   database : postgres.database,
   password: postgres.password
-};
+}
 
 if (postgres.ssl) {
-  console.log('ssl certs');
+  console.log('ssl certs')
   connection['ssl'] = {
     ca: fs.readFileSync(path.resolve(postgres.ssl.ca)).toString(),
     key: fs.readFileSync(path.resolve(postgres.ssl.key)).toString(),
@@ -22,7 +22,16 @@ if (postgres.ssl) {
 
 let db = knex({
   client: 'postgres',
-  connection
-});
+  connection,
+  debug: true,
+  pool: {
+    afterCreate: function (conn, done) {
+      console.log('connected')
+      done()
+    }
+  }
+})
 
-export default db;
+
+
+export default db
