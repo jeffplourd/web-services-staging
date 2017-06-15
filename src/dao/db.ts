@@ -39,6 +39,10 @@ const pool = new pg.Pool(connection)
 //   }
 // })
 
+pool.on('error', (err, client) => {
+  console.error('idle client error', err.message, err.stack);
+})
+
 export function query(text, values, callback) {
   console.log('query:', text, values)
   return pool.query(text, values, callback)
