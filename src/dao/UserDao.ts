@@ -15,12 +15,14 @@ export function getById(id: string): QueryBuilder {
 }
 
 export function create(user: any): QueryBuilder {
-  return db.insert({
-    id: uuid.v1(),
-    email: user.email,
-    created: '2017-06-03 18:20:36',
-    last_login: '2017-06-03 18:20:36'
-  }).into('classkick.user')
+  return db
+    .insert({
+      id: uuid.v1(),
+      email: user.email,
+      created: '2017-06-03 18:20:36',
+      last_login: '2017-06-03 18:20:36'
+    })
+    .into('classkick.user')
 }
 
 export function getAll(): QueryBuilder {

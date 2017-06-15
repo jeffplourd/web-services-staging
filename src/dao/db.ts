@@ -5,13 +5,11 @@ import * as path from 'path'
 import * as pg from 'pg'
 
 const connection = {
-  host : '127.0.0.1', //postgres.host,
-  port: postgres.port,
-  user : process.env.DB_USER  || postgres.user,
-  database : postgres.database,
+  host: process.env.DB_HOST || postgres.host,
+  port: process.env.DB_PORT || postgres.port,
+  user: process.env.DB_USER  || postgres.user,
+  database: postgres.database,
   password: process.env.DB_PASSWORD || postgres.password,
-  // max: 10,
-  // idleTimeoutMillis: 30000
 }
 
 console.log('connection config: ', connection)
@@ -27,13 +25,7 @@ console.log('connection config: ', connection)
 
 let db = knex({
   client: 'postgres',
-  connection,
-  pool: {
-    afterCreate: function (conn, done) {
-      console.log('connected')
-      done()
-    }
-  }
+  connection
 })
 
 export default db

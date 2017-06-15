@@ -29,4 +29,6 @@ deployment:
   staging:
     branch: staging
     commands:
+      - which node
+      - which gulp
       - bash deploy.sh
