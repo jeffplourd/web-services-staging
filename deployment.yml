@@ -1,0 +1,59 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: web-services-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: web-services-deployment
+    spec:
+      containers:
+        - image: us.gcr.io/web-services-staging/hello:latest
+          name: web-services-staging
+          env:
+            - name: DB_HOST
+              value: 127.0.0.1:5432
+            # These secrets are required to start the pod.
+            # [START cloudsql_secrets]
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-db-credentials
+                  key: password
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-db-credentials
+                  key: username
+            # [END cloudsql_secrets]
+          ports:
+            - containerPort: 3000
+              name: ws-staging
+        # [START proxy_container]
+        - image: gcr.io/cloudsql-docker/gce-proxy:1.09
+          name: cloudsql-proxy
+          command: ["/cloud_sql_proxy", "--dir=/cloudsql",
+                    "-instances=web-services-staging:us-central1:web-services-staging-db=tcp:5432",
+                    "-credential_file=/secrets/cloudsql/credentials.json"]
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true
+            - name: ssl-certs
+              mountPath: /etc/ssl/certs
+            - name: cloudsql
+              mountPath: /cloudsql
+        # [END proxy_container]
+      # [START volumes]
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
+        - name: ssl-certs
+          hostPath:
+            path: /etc/ssl/certs
+        - name: cloudsql
+          emptyDir:
+      # [END volumes]

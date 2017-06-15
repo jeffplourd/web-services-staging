@@ -287,8 +287,8 @@ gulp.task('dockerRun', (cb) => {
 });
 
 //
-// psql "sslmode=verify-full sslrootcert=server-ca.pem \
-//       sslcert=client-cert.pem sslkey=client-key.pem \
+// psql "sslmode=verify-full sslrootcert=certs/server-ca.pem \
+//       sslcert=certs/client-cert.pem sslkey=certs/client-key.pem \
 //       hostaddr=104.154.139.93 \
 //       host=web-services-staging:web-services-staging-db \
 //       port=5432 \

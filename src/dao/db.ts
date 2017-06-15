@@ -5,51 +5,35 @@ import * as path from 'path'
 import * as pg from 'pg'
 
 const connection = {
-  host : postgres.host,
+  host : '127.0.0.1', //postgres.host,
   port: postgres.port,
-  user : postgres.user,
+  user : process.env.DB_USER  || postgres.user,
   database : postgres.database,
-  password: postgres.password,
-  max: 10,
-  idleTimeoutMillis: 30000
+  password: process.env.DB_PASSWORD || postgres.password,
+  // max: 10,
+  // idleTimeoutMillis: 30000
 }
 
+console.log('connection config: ', connection)
 
-
-if (postgres.ssl) {
-  console.log('ssl certs')
-  connection['ssl'] = {
-    ca: fs.readFileSync(path.resolve(postgres.ssl.ca)).toString(),
-    key: fs.readFileSync(path.resolve(postgres.ssl.key)).toString(),
-    cert: fs.readFileSync(path.resolve(postgres.ssl.cert)).toString()
-  }
-}
-
-const pool = new pg.Pool(connection)
-
-// let db = knex({
-//   client: 'postgres',
-//   connection,
-//   debug: true,
-//   pool: {
-//     afterCreate: function (conn, done) {
-//       console.log('connected')
-//       done()
-//     }
+// if (postgres.ssl) {
+//   console.log('ssl certs')
+//   connection['ssl'] = {
+//     ca: fs.readFileSync(path.resolve(postgres.ssl.ca)).toString(),
+//     key: fs.readFileSync(path.resolve(postgres.ssl.key)).toString(),
+//     cert: fs.readFileSync(path.resolve(postgres.ssl.cert)).toString()
 //   }
-// })
+// }
 
-pool.on('error', (err, client) => {
-  console.error('idle client error', err.message, err.stack);
+let db = knex({
+  client: 'postgres',
+  connection,
+  pool: {
+    afterCreate: function (conn, done) {
+      console.log('connected')
+      done()
+    }
+  }
 })
 
-export function query(text, values, callback) {
-  console.log('query:', text, values)
-  return pool.query(text, values, callback)
-}
-
-export function connect(callback) {
-  return pool.connect(callback)
-}
-
-// export default pool
+export default db
