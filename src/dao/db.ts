@@ -2,6 +2,7 @@ import * as knex from 'knex'
 import { postgres } from 'config'
 import * as fs from 'fs'
 import * as path from 'path'
+import * as pg from 'pg'
 
 const connection = {
   host : postgres.host,
@@ -9,8 +10,11 @@ const connection = {
   user : postgres.user,
   database : postgres.database,
   password: postgres.password,
-  requestTimeout: 1
+  max: 10,
+  idleTimeoutMillis: 30000
 }
+
+
 
 if (postgres.ssl) {
   console.log('ssl certs')
@@ -21,21 +25,27 @@ if (postgres.ssl) {
   }
 }
 
-let db = knex({
-  client: 'postgres',
-  connection,
-  debug: true,
-  pool: {
-    min: 2,
-    max: 2,
-    afterCreate: function (conn, done) {
-      console.log('connected')
-      done()
-    }
-  },
-  acquireConnectionTimeout: 2
-})
+const pool = new pg.Pool(connection)
 
+// let db = knex({
+//   client: 'postgres',
+//   connection,
+//   debug: true,
+//   pool: {
+//     afterCreate: function (conn, done) {
+//       console.log('connected')
+//       done()
+//     }
+//   }
+// })
 
+export function query(text, values, callback) {
+  console.log('query:', text, values)
+  return pool.query(text, values, callback)
+}
 
-export default db
+export function connect(callback) {
+  return pool.connect(callback)
+}
+
+// export default pool
