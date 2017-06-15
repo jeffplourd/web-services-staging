@@ -8,7 +8,8 @@ const connection = {
   port: postgres.port,
   user : postgres.user,
   database : postgres.database,
-  password: postgres.password
+  password: postgres.password,
+  requestTimeout: 1
 }
 
 if (postgres.ssl) {
@@ -25,11 +26,14 @@ let db = knex({
   connection,
   debug: true,
   pool: {
+    min: 2,
+    max: 2,
     afterCreate: function (conn, done) {
       console.log('connected')
       done()
     }
-  }
+  },
+  acquireConnectionTimeout: 2
 })
 
 
