@@ -10,7 +10,7 @@ spec:
         app: web-services-deployment
     spec:
       containers:
-        - image: us.gcr.io/web-services-staging/hello:${CIRCLE_SHA1}
+        - image: us.gcr.io/web-services-staging/hello
           name: web-services-staging
           env:
             - name: DB_HOST
