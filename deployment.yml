@@ -11,6 +11,7 @@ spec:
     spec:
       containers:
         - image: us.gcr.io/web-services-staging/hello
+          imagePullPolicy: Always
           name: web-services-staging
           env:
             - name: DB_HOST

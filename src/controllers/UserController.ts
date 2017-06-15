@@ -17,12 +17,15 @@ router.post('/', (req: Request, res: Response) => {
   req.getValidationResult().then((result) => {
     if (result.isEmpty()) {
       console.log('req.body', req.body)
-      userDao.create(req.body).then((user) => {
-        console.log('user', user)
-        res.status(200).send({token: 'this is a token'})
-      }).catch((err) => {
-        console.log("err", err);
-      })
+      userDao.create(req.body)
+        .then((user) => {
+          console.log('user', user)
+          res.status(200).send({token: 'this is a token'})
+        })
+        .catch((err) => {
+          console.log("err", err);
+          res.boom.conflict('Email is taken');
+        })
     }
     else {
       res.boom.badRequest('Validation errors', result.mapped())
