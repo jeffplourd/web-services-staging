@@ -339,10 +339,9 @@ function createPattern(obj) {
 gulp.task('kubectlCreateDeplConfig', () => {
 
   const patterns = createPattern({
-    deployName: `${gcloud.clusterId}-depl`,
+    deployName: `${gcloud.clusterId}-deployment`,
     replicas: 1,
-    image: gcloud.image,
-    appName: gcloud.appName
+    image: gcloud.image
   });
 
   gulp.src('./deployment/kubernetes-deployment-template.yml')
@@ -363,12 +362,12 @@ gulp.task('kubectlCreateServiceConfig', () => {
     .pipe(gulp.dest('./deployment'));
 });
 
-gulp.task('gclusterDeployDepl', (cb) => {
-  runSequence('kubectlCreateDeplConfig', () => {
-    console.log('deploying');
-    cb();
-  });
-});
+// gulp.task('gclusterDeployDepl', (cb) => {
+//   runSequence('kubectlCreateDeplConfig', () => {
+//     console.log('deploying');
+//     cb();
+//   });
+// });
 
 gulp.task('testTask', (cb) => {
   console.log('this is a test task');
