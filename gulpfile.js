@@ -53,12 +53,15 @@ const gcloud = {
   projectId: 'web-services-staging',
   clusterId: 'web-services',
   zoneId: 'us-central1-a',
-  serviceKey: process.env.GCLOUD_SERVICE_KEY,
+  serviceKey: process.env.GCLOUD_SERVICE_KEY || 'serviceKey',
+  imageVersion: process.env.CIRCLE_SHA1 || 'imageVersion',
+  branch: process.env.CIRCLE_BRANCH || 'branch'
 };
 
 gcloud.uri = `${gcloud.domain}/${gcloud.projectId}/`;
 gcloud.dbScripts = `gs://${gcloud.dbBucket}/${gcloud.dbAppBucket}/${VERSION}`;
-gcloud.imageName = `${gcloud.uri}`
+gcloud.imageName = `${gcloud.clusterId}-${gcloud.branch}`;
+gcloud.image = `${gcloud.uri}${gcloud.imageName}:${gcloud.imageVersion}`;
 
 const env = {
   NODE_ENV: argv.env || 'default',
@@ -306,22 +309,6 @@ gulp.task('dockerRun', (cb) => {
     .then(() => cb());
 });
 
-gulp.task('gclusterDeploy', () => {
-
-  let json = YAML.load('deployment-temp.yml');
-  console.log('json.metadata.name', json.metadata.name);
-
-  json.metadata.name = 'web-services-staging';
-  json.spec.template.metadata.labels = { app: 'web-services-staging' };
-  json.spec.template.spec.containers[0].image = 'us.gcr.io/web-services-staging/hello';
-
-  json = JSON.stringify(json, null, '\t');
-
-  fs.writeFileSync('deployment-test.json', json);
-
-});
-
-
 gulp.task('testReplace', () => {
 
   gulp.src('./deployment/deployment-temp.yml')
@@ -404,4 +391,6 @@ gulp.task('gcloudAuthServiceAccount', (cb) => {
     .then(() => cb());
 });
 
-gulp.task('')
+gulp.task('gcloudConfig', (cb) => {
+  $exec(utils.gcloud(''))
+});
