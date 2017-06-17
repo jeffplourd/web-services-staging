@@ -9,3 +9,5 @@ sudo chown -R ubuntu:ubuntu /home/ubuntu/.kube
 #kubectl create secret generic cloudsql-instance-credentials --from-file=credentials.json=${HOME}/gcloud-service-key.json
 #kubectl create secret generic cloudsql-db-credentials --from-literal=username=postgres --from-literal=password=postgres
 kubectl replace -f ./deployment.yml
+which node
+which gulp

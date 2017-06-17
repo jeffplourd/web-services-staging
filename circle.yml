@@ -20,6 +20,8 @@ dependencies:
     - sudo /opt/google-cloud-sdk/bin/gcloud --quiet container clusters get-credentials $CLUSTER_NAME
     - docker build -t us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1 -f dockerfiles/Dockerfile.${CIRCLE_BRANCH} .
     - docker tag us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1 us.gcr.io/${PROJECT_NAME}/hello:latest
+    - which gulp
+    - gulp testTask
 
 deployment:
   production:

@@ -1,4 +1,5 @@
 'use strict';
+let _ = require('lodash');
 let gulp = require('gulp');
 let fs = require('fs');
 let path = require('path');
@@ -16,6 +17,8 @@ let remapIstanbul = require('remap-istanbul/lib/gulpRemapIstanbul');
 let exec = require('child_process').exec;
 let argv = require('yargs').argv;
 let YAML = require('yamljs');
+let replace = require('gulp-replace-task');
+let rename = require('gulp-rename');
 
 const CLEAN_BUILD = 'clean:build';
 const CLEAN_COVERAGE = 'clean:coverage';
@@ -263,6 +266,17 @@ gulp.task('dbUpdate', (cb) => {
   }
 });
 
+gulp.task('psql', (cb) => {
+  $exec(`
+    psql "sslmode=verify-full sslrootcert=certs/server-ca.pem \
+          sslcert=certs/client-cert.pem sslkey=certs/client-key.pem \
+          hostaddr=104.154.139.93 \
+          host=web-services-staging:web-services-staging-db \
+          port=5432 \
+          user=postgres dbname=postgres"
+  `).then(() => cb());
+});
+
 gulp.task('dbPublish', (cb) => {
   $exec(`gsutil rsync -r -d -c src/db ${gcloud.dbScripts}`).then(() => cb())
 });
@@ -286,10 +300,75 @@ gulp.task('dockerRun', (cb) => {
     .then(() => cb());
 });
 
-//
-// psql "sslmode=verify-full sslrootcert=certs/server-ca.pem \
-//       sslcert=certs/client-cert.pem sslkey=certs/client-key.pem \
-//       hostaddr=104.154.139.93 \
-//       host=web-services-staging:web-services-staging-db \
-//       port=5432 \
-//       user=postgres dbname=postgres"
+gulp.task('gclusterDeploy', () => {
+
+  let json = YAML.load('deployment-temp.yml');
+  console.log('json.metadata.name', json.metadata.name);
+
+  json.metadata.name = 'web-services-staging';
+  json.spec.template.metadata.labels = { app: 'web-services-staging' };
+  json.spec.template.spec.containers[0].image = 'us.gcr.io/web-services-staging/hello';
+
+  json = JSON.stringify(json, null, '\t');
+
+  fs.writeFileSync('deployment-test.json', json);
+
+});
+
+
+gulp.task('testReplace', () => {
+
+  gulp.src('./deployment/deployment-temp.yml')
+    .pipe(replace({
+      patterns: [
+        { match: 'testy', replacement: 'myreplacement' }
+      ]
+    }))
+    .pipe(gulp.dest('replaced.yml'));
+});
+
+function creastePattern(obj) {
+  const result = [];
+  _.forEach(obj, (value, key) => {
+    console.log('value', value, 'key', key);
+    result.push({
+      match: key,
+      replacement: value
+    });
+  });
+  return result;
+}
+
+gulp.task('kubectlCreateDeplConfig', () => {
+
+  const patterns = creastePattern({
+    name: 'web-services-deployment',
+    imageName: '',
+    replicas: 3
+  });
+
+  // const patterns = [
+  //   {
+  //     match: 'replicas',
+  //     replacement: 3
+  //   }
+  // ];
+
+  gulp.src('./deployment/kubernetes-deployment-template.yml')
+    .pipe(replace({ patterns }))
+    .pipe(rename('kubernetes-deployment.yml'))
+    .pipe(gulp.dest('./deployment'))
+});
+
+gulp.task('gclusterDeployDepl', (cb) => {
+  runSequence('kubectlCreateDeplConfig', () => {
+    console.log('deploying');
+    cb();
+  });
+});
+
+gulp.task('testTask', () => {
+  console.log('this is a test task', env)
+  console.log('env', env);
+  console.log('process.env', process.env);
+});
