@@ -9,7 +9,7 @@ machine:
     - docker
 
 dependencies:
-  pre:
+  post:
     - sudo /opt/google-cloud-sdk/bin/gcloud --quiet components update
     - sudo /opt/google-cloud-sdk/bin/gcloud --quiet components update kubectl
     - echo $GCLOUD_SERVICE_KEY | base64 --decode -i > ${HOME}/gcloud-service-key.json
@@ -21,7 +21,6 @@ dependencies:
     - docker build -t us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1 -f dockerfiles/Dockerfile.${CIRCLE_BRANCH} .
     - docker tag us.gcr.io/${PROJECT_NAME}/hello:$CIRCLE_SHA1 us.gcr.io/${PROJECT_NAME}/hello:latest
     - ls -a
-  post:
     - which gulp
     - gulp testTask
 

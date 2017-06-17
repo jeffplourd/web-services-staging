@@ -368,7 +368,7 @@ gulp.task('gclusterDeployDepl', (cb) => {
 });
 
 gulp.task('testTask', () => {
-  console.log('this is a test task', env)
+  console.log('this is a test task')
   console.log('env', env);
   console.log('process.env', process.env);
 });
