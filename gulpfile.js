@@ -1,5 +1,6 @@
 'use strict';
 let _ = require('lodash');
+let utils = require('./gulp-utils');
 let gulp = require('gulp');
 let fs = require('fs');
 let path = require('path');
@@ -75,6 +76,9 @@ class DockerUtils {
 }
 
 function $exec(cmd, options = {}) {
+
+  options['env'] = _.assign({}, process.env, options.env || {});
+
   return new Promise((resolve, reject) => {
     let child = exec(cmd, options, (err, stdout, stderr) => {
       if (err) {
@@ -367,8 +371,16 @@ gulp.task('gclusterDeployDepl', (cb) => {
   });
 });
 
-gulp.task('testTask', () => {
-  console.log('this is a test task')
+gulp.task('testTask', (cb) => {
+  console.log('this is a test task');
   console.log('env', env);
   console.log('process.env', process.env);
+  $exec(utils.gcloud('info')).then(() => cb());
 });
+
+gulp.task('gcloudUpdate', (cb) => {
+  $exec(utils.gcloud('--quiet components update'))
+    .then(() => cb());
+});
+
+
