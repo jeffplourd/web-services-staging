@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-services-staging-service
+  labels:
+    app:  web-services-staging
+spec:
+  ports:
+   - port: 80
+     targetPort: 3000
+  selector:
+    app: web-services-staging
+  type: LoadBalancer

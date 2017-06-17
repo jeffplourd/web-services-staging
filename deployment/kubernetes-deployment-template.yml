@@ -1,16 +1,16 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: ''
+  name: @@deployName
 spec:
-  replicas: 1
+  replicas: @@replicas
   template:
     metadata:
       labels:
-        app:  @@testy
+        app: web-services-staging
     spec:
       containers:
-        - image: ''
+        - image: @@image
           imagePullPolicy: Always
           name: web-services-staging
           env:
