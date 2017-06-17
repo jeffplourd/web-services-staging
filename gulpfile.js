@@ -55,7 +55,7 @@ const gcloud = {
   zoneId: 'us-central1-a',
   serviceKey: process.env.GCLOUD_SERVICE_KEY || 'serviceKey',
   imageVersion: process.env.CIRCLE_SHA1 || 'imageVersion',
-  branch: process.env.CIRCLE_BRANCH || argv.env || 'branch'
+  branch: process.env.CIRCLE_BRANCH || argv.env || 'branch',
 };
 
 gcloud.uri = `${gcloud.domain}/${gcloud.projectId}/`;
@@ -299,6 +299,10 @@ gulp.task('dockerBuild', (cb) => {
     .then(() => cb());
 });
 
+gulp.task('pushDocker', (cb) => {
+  $exec(utils.gcloud(`docker -- push ${gcloud.image}`)).then(() => cb());
+});
+
 gulp.task('dockerRun', (cb) => {
   if (env.NODE_ENV === 'default') {
     return;
@@ -335,9 +339,10 @@ function createPattern(obj) {
 gulp.task('kubectlCreateDeplConfig', () => {
 
   const patterns = createPattern({
-    name: 'web-services-deployment',
-    imageName: '',
-    replicas: 3
+    deployName: `${gcloud.clusterId}-depl`,
+    replicas: 1,
+    image: gcloud.image,
+    appName: gcloud.appName
   });
 
   gulp.src('./deployment/kubernetes-deployment-template.yml')
