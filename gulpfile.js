@@ -383,4 +383,12 @@ gulp.task('gcloudUpdate', (cb) => {
     .then(() => cb());
 });
 
+gulp.task('kubeUpdate', ['gcloudUpdate'], (cb) => {
+  $exec(utils.gcloud('--quiet components update kubectl')).then(() => cb());
+});
+
+gulp.task('createServiceKeyFromEncryption', (cb) => {
+  $exec('echo $GCLOUD_SERVICE_KEY | base64 --decode -i > ${HOME}/gcloud-service-key.json').then(() => cb());
+});
+
 
