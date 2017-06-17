@@ -392,5 +392,9 @@ gulp.task('gcloudAuthServiceAccount', (cb) => {
 });
 
 gulp.task('gcloudConfig', (cb) => {
-  $exec(utils.gcloud(''))
+  $exec(utils.gcloud(`config set project ${gcloud.projectId}`))
+    .then(() => $exec(`--quiet config set container/cluster ${gcloud.clusterId}`))
+    .then(() => $exec(`config set compute/zone ${gcloud.zoneId}`))
+    .then(() => $exec(`--quiet container clusters get-credentials ${gcloud.clusterId}`))
+    .then(() => cb());
 });
