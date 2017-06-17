@@ -55,7 +55,7 @@ const gcloud = {
   zoneId: 'us-central1-a',
   serviceKey: process.env.GCLOUD_SERVICE_KEY || 'serviceKey',
   imageVersion: process.env.CIRCLE_SHA1 || 'imageVersion',
-  branch: process.env.CIRCLE_BRANCH || 'branch'
+  branch: process.env.CIRCLE_BRANCH || argv.env || 'branch'
 };
 
 gcloud.uri = `${gcloud.domain}/${gcloud.projectId}/`;
@@ -64,7 +64,7 @@ gcloud.imageName = `${gcloud.clusterId}-${gcloud.branch}`;
 gcloud.image = `${gcloud.uri}${gcloud.imageName}:${gcloud.imageVersion}`;
 
 const env = {
-  NODE_ENV: argv.env || 'default',
+  NODE_ENV: gcloud.branch || 'default',
   NODE_CONFIG_DIR: './src/config'
 };
 
@@ -295,7 +295,7 @@ gulp.task('dockerBuild', (cb) => {
     return;
   }
 
-  $exec(`docker build -f dockerfiles/Dockerfile.${env.NODE_ENV} -t web-services-${env.NODE_ENV} .`)
+  $exec(`docker build -f dockerfiles/Dockerfile.${gcloud.branch} -t ${gcloud.image} .`)
     .then(() => cb());
 });
 
