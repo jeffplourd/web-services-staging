@@ -50,13 +50,15 @@ const gcloud = {
   dbBucket: 'database-scripts-jeff',
   dbAppBucket: 'web-services',
   domain: 'us.gcr.io',
-  projectId: 'classkick-907',
+  projectId: 'web-services-staging',
   clusterId: 'web-services',
-  zoneId: 'us-central1-f'
+  zoneId: 'us-central1-a',
+  serviceKey: process.env.GCLOUD_SERVICE_KEY,
 };
 
 gcloud.uri = `${gcloud.domain}/${gcloud.projectId}/`;
-gcloud.dbScripts = `gs://${gcloud.dbBucket}/${gcloud.dbAppBucket}/${VERSION}`
+gcloud.dbScripts = `gs://${gcloud.dbBucket}/${gcloud.dbAppBucket}/${VERSION}`;
+gcloud.imageName = `${gcloud.uri}`
 
 const env = {
   NODE_ENV: argv.env || 'default',
@@ -331,7 +333,7 @@ gulp.task('testReplace', () => {
     .pipe(gulp.dest('replaced.yml'));
 });
 
-function creastePattern(obj) {
+function createPattern(obj) {
   const result = [];
   _.forEach(obj, (value, key) => {
     console.log('value', value, 'key', key);
@@ -345,23 +347,28 @@ function creastePattern(obj) {
 
 gulp.task('kubectlCreateDeplConfig', () => {
 
-  const patterns = creastePattern({
+  const patterns = createPattern({
     name: 'web-services-deployment',
     imageName: '',
     replicas: 3
   });
 
-  // const patterns = [
-  //   {
-  //     match: 'replicas',
-  //     replacement: 3
-  //   }
-  // ];
-
   gulp.src('./deployment/kubernetes-deployment-template.yml')
     .pipe(replace({ patterns }))
     .pipe(rename('kubernetes-deployment.yml'))
-    .pipe(gulp.dest('./deployment'))
+    .pipe(gulp.dest('./deployment'));
+});
+
+gulp.task('kubectlCreateServiceConfig', () => {
+
+  const patterns = createPattern({
+    imageName: gcloud.imageName
+  });
+
+  gulp.src('./deployment/kubernetes-service-template.yml')
+    .pipe(replace({ patterns }))
+    .pipe(rename('kubernetes-service.yml'))
+    .pipe(gulp.dest('./deployment'));
 });
 
 gulp.task('gclusterDeployDepl', (cb) => {
@@ -388,7 +395,13 @@ gulp.task('kubeUpdate', ['gcloudUpdate'], (cb) => {
 });
 
 gulp.task('createServiceKeyFromEncryption', (cb) => {
-  $exec('echo $GCLOUD_SERVICE_KEY | base64 --decode -i > ${HOME}/gcloud-service-key.json').then(() => cb());
+  $exec(`echo ${gcloud.serviceKey} | base64 --decode -i > ./gcloud-service-key.json`)
+    .then(() => cb());
 });
 
+gulp.task('gcloudAuthServiceAccount', (cb) => {
+  $exec(utils.gcloud('auth activate-service-account --key-file ./gcloud-service-key.json'))
+    .then(() => cb());
+});
 
+gulp.task('')
