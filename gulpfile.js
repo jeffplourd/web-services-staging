@@ -390,5 +390,15 @@ gulp.task('kubeDeployDeployment', (cb) => {
   $exec('kubectl apply -f ./deployment/kubernetes-deployment.yml').then(() => cb());
 });
 
-// gulp.task('')
+gulp.task('circleStart', (cb) => {
+  runSequence(
+    'gcloudUpdate',
+    'kubeUpdate',
+    'createServiceKeyFromEncryption',
+    'gcloudAuthServiceAccount',
+    'gcloudConfig',
+    'dockerBuild',
+    cb
+  );
+});
 
