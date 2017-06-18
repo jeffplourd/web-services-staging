@@ -396,7 +396,7 @@ gulp.task('downloadSQLProxy', (cb) => {
 });
 
 gulp.task('startSQLProxy', ['downloadSQLProxy'], (cb) => {
-  $exec(`./cloud_sql_proxy -instances=${gcloud.dbInstanceName}=tcp:5432`).then(() => cb());
+  $exec(`./cloud_sql_proxy -instances=${gcloud.dbInstanceName}=tcp:5432 -credential_file=gcloud-service-key.json &`).then(() => cb());
 });
 
 gulp.task('gcloudDeploy', (cb) => {
