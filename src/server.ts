@@ -46,6 +46,9 @@ export class Server {
   initRoutes() {
     winston.log('info', '--> Initialisations des routes')
 
+    this.app.use('/v1/config', (req: Request, res: Response) => res.status(200).json({
+      env: process.env
+    }))
     this.app.use('/v1/info', (req: Request, res: Response) => res.status(200).json(config))
     this.app.use('/v1/users', userController)
     // init graphql and graphiql routes

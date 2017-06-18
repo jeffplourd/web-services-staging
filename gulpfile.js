@@ -54,7 +54,7 @@ const gcloud = {
   zoneId: 'us-central1-a',
   serviceKey: process.env.GCLOUD_SERVICE_KEY || 'serviceKey',
   imageVersion: process.env.CIRCLE_SHA1 || 'imageVersion',
-  branch: process.env.CIRCLE_BRANCH || argv.env || 'branch',
+  branch: process.env.CIRCLE_BRANCH || argv.env || 'default',
 };
 
 gcloud.uri = `${gcloud.domain}/${gcloud.projectId}/`;
