@@ -4,10 +4,14 @@ import * as userDao from '../dao/UserDao'
 const router = Router()
 
 router.get('/', (req: Request, res: Response) => {
-  userDao.getAll().then((users) => {
-    console.log('all users: ', users);
-    res.status(200).send({ users });
-  })
+  userDao.getAll()
+    .then((users) => {
+      console.log('all users: ', users);
+      res.status(200).send({ users });
+    })
+    .catch((error) => {
+      res.boom.basRequest('not sure', error);
+    });
 })
 
 router.post('/', (req: Request, res: Response) => {
@@ -22,9 +26,9 @@ router.post('/', (req: Request, res: Response) => {
           console.log('user', user)
           res.status(200).send({token: 'this is a token'})
         })
-        .catch((err) => {
-          console.log("err", err);
-          res.boom.conflict('Email is taken');
+        .catch((error) => {
+          console.log("error", error);
+          res.boom.conflict('Email is taken', error);
         })
     }
     else {

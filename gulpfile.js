@@ -199,9 +199,6 @@ gulp.task('watch', [BUILD], function() {
 });
 
 gulp.task('serve', [ BUILD ], (cb) => {
-
-  console.log('env', env);
-
   function serve(cb) {
     $exec('node build/server.js', { env }).then(() => cb());
   }
