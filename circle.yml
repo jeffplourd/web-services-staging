@@ -8,9 +8,9 @@ machine:
   services:
     - docker
 
-dependencies:
-  post:
-    - gulp circleStart
+#dependencies:
+#  post:
+#    - gulp circleStart
 #    - gulp gcloudUpdate
 #    - gulp kubeUpdate
 #    - gulp createServiceKeyFromEncryption
@@ -33,8 +33,8 @@ deployment:
   production:
     branch: production
     commands:
-      - bash deploy.sh
+      - gulp gcloudDeploy
   staging:
     branch: staging
     commands:
-      - bash deploy.sh
+      - gulp gcloudDeploy
