@@ -1,7 +1,7 @@
 const config = {
   "env": "staging",
   "postgres": {
-    "host": process.env.DB_HOST || "104.154.139.93",
+    "host": process.env.DB_HOST || "127.0.0.1",
     "port": process.env.DB_PORT || "5432",
     "user": process.env.DB_USER  || "postgres",
     "database": "postgres",

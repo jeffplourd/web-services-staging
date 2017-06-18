@@ -48,6 +48,7 @@ const VERSION = require('./package.json').version;
 const gcloud = {
   dbBucket: 'database-scripts-jeff',
   dbAppBucket: 'web-services',
+  dbInstanceName: 'web-services-staging:us-central1:web-services-staging-db',
   domain: 'us.gcr.io',
   projectId: 'web-services-staging',
   clusterId: 'web-services',
@@ -387,6 +388,17 @@ gulp.task('kubeDeployDeployment', (cb) => {
   $exec('kubectl apply -f ./deployment/kubernetes-deployment.yml').then(() => cb());
 });
 
+gulp.task('downloadSQLProxy', (cb) => {
+  $exec('wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64')
+    .then(() => $exec('mv cloud_sql_proxy.linux.amd64 cloud_sql_proxy'))
+    .then(() => $exec('chmod +x cloud_sql_proxy'))
+    .then(() => cb());
+});
+
+gulp.task('startSQLProxy', ['downloadSQLProxy'], (cb) => {
+  $exec(`./cloud_sql_proxy -instances=${gcloud.dbInstanceName}=tcp:5432`).then(() => cb());
+});
+
 gulp.task('gcloudDeploy', (cb) => {
   runSequence(
     'gcloudUpdate',
@@ -396,6 +408,9 @@ gulp.task('gcloudDeploy', (cb) => {
     'gcloudConfig',
     'dockerBuild',
     'pushDocker',
+    'downloadSQLProxy',
+    'startSQLProxy',
+    'dbUpdate',
     'kubectlCreateDeplConfig',
     'kubectlCreateServiceConfig',
     'kubeDeployDeployment',

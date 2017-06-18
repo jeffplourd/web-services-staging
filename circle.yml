@@ -12,4 +12,4 @@ deployment:
   staging:
     branch: staging
     commands:
-      - gulp gcloudDeploy
+      - gulp gcloudDeploy --env=staging
