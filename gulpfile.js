@@ -64,7 +64,7 @@ gcloud.image = `${gcloud.uri}${gcloud.imageName}:${gcloud.imageVersion}`;
 
 const env = {
   NODE_ENV: gcloud.branch || 'default',
-  NODE_CONFIG_DIR: './src/config'
+  NODE_CONFIG_DIR: './build/config'
 };
 
 function $exec(cmd, options = {}) {
@@ -199,6 +199,8 @@ gulp.task('watch', [BUILD], function() {
 });
 
 gulp.task('serve', [ BUILD ], (cb) => {
+
+  console.log('env', env);
 
   function serve(cb) {
     $exec('node build/server.js', { env }).then(() => cb());
@@ -379,10 +381,14 @@ gulp.task('gcloudConfig', (cb) => {
     .then(() => $exec(utils.gcloud(`--quiet config set container/cluster ${gcloud.clusterId}`)))
     .then(() => $exec(utils.gcloud(`config set compute/zone ${gcloud.zoneId}`)))
     .then(() => $exec(utils.gcloud(`--quiet container clusters get-credentials ${gcloud.clusterId}`)))
+    .then(() => $exec('sudo chown -R $USER /home/ubuntu/.config'))
+    .then(() => $exec('sudo chown -R ubuntu:ubuntu /home/ubuntu/.kube'))
     .then(() => cb());
 });
 
 gulp.task('kubeDeployDeployment', (cb) => {
   $exec('kubectl apply -f ./deployment/kubernetes-deployment.yml').then(() => cb());
 });
+
+gulp.task('')
 

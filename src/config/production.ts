@@ -1,4 +1,4 @@
-{
+const config = {
   "env": "production",
   "postgres": {
     "host": "",
@@ -8,3 +8,5 @@
     "password": "postgres"
   }
 }
+
+export = config;

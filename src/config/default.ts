@@ -1,4 +1,4 @@
-{
+const config = {
   "port": 3000,
   "postgres": {
     "host": "192.168.99.100",
@@ -8,3 +8,5 @@
     "password": "postgres"
   }
 }
+
+export = config;
