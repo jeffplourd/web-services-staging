@@ -10,7 +10,7 @@ router.get('/', (req: Request, res: Response) => {
       res.status(200).send({ users });
     })
     .catch((error) => {
-      res.boom.basRequest('not sure', error);
+      res.boom.badRequest('not sure', error);
     });
 })
 

@@ -2,7 +2,6 @@ import * as knex from 'knex'
 import { postgres } from 'config'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as pg from 'pg'
 
 const connection = {
   host: postgres.host,
