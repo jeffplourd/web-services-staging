@@ -43,7 +43,6 @@ const STATIC_FILES = ['./src/**/*.json'];
 
 const tsProject = typescript.createProject('tsconfig.json');
 
-const PORT = 3000;
 const VERSION = require('./package.json').version;
 
 const gcloud = {
@@ -67,18 +66,6 @@ const env = {
   NODE_ENV: gcloud.branch || 'default',
   NODE_CONFIG_DIR: './src/config'
 };
-
-class DockerUtils {
-  static image(docker) {
-    return `${gcloud.uri()}${docker.imageName}:${VERSION}`
-  }
-  static container(docker) {
-    return `${docker.imageName}.container`
-  }
-  static writeDockerfile(text) {
-    fs.writeFileSync('./build/Dockerfile', text);
-  }
-}
 
 function $exec(cmd, options = {}) {
 
@@ -362,15 +349,7 @@ gulp.task('kubectlCreateServiceConfig', () => {
     .pipe(gulp.dest('./deployment'));
 });
 
-// gulp.task('gclusterDeployDepl', (cb) => {
-//   runSequence('kubectlCreateDeplConfig', () => {
-//     console.log('deploying');
-//     cb();
-//   });
-// });
-
 gulp.task('testTask', (cb) => {
-  console.log('this is a test task');
   console.log('env', env);
   console.log('process.env', process.env);
   $exec(utils.gcloud('info')).then(() => cb());
@@ -402,3 +381,8 @@ gulp.task('gcloudConfig', (cb) => {
     .then(() => $exec(utils.gcloud(`--quiet container clusters get-credentials ${gcloud.clusterId}`)))
     .then(() => cb());
 });
+
+gulp.task('kubeDeployDeployment', (cb) => {
+  $exec('kubectl apply -f ./deployment/kubernetes-deployment.yml').then(() => cb());
+});
+
