@@ -13,14 +13,14 @@ const connection = {
 
 console.log('connection config: ', connection)
 
-if (postgres.ssl) {
-  console.log('ssl certs')
-  connection['ssl'] = {
-    ca: fs.readFileSync(path.resolve(postgres.ssl.ca)).toString(),
-    key: fs.readFileSync(path.resolve(postgres.ssl.key)).toString(),
-    cert: fs.readFileSync(path.resolve(postgres.ssl.cert)).toString()
-  }
-}
+// if (postgres.ssl) {
+//   console.log('ssl certs')
+//   connection['ssl'] = {
+//     ca: fs.readFileSync(path.resolve(postgres.ssl.ca)).toString(),
+//     key: fs.readFileSync(path.resolve(postgres.ssl.key)).toString(),
+//     cert: fs.readFileSync(path.resolve(postgres.ssl.cert)).toString()
+//   }
+// }
 
 let db = knex({
   client: 'postgres',
