@@ -5,7 +5,7 @@ const config = {
     "port": process.env.DB_PORT || "5432",
     "user": process.env.DB_USER  || "postgres",
     "database": "postgres",
-    "password": process.env.DB_PASSWORD || "postgres",
+    "password": "postgres",
     "ssl": {
       "rejectUnauthorized": false,
       "ca": "certs/server-ca.pem",
